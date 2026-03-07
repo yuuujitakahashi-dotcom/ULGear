@@ -43,8 +43,7 @@ body{background:var(--bg);color:var(--on-surface);font-family:'Noto Sans JP',san
 
 /* ── Search card (hero) ── */
 .search-hero{
-  background:var(--surface);border-radius:28px;
-  box-shadow:var(--e2);margin-bottom:20px;overflow:visible;
+  margin-bottom:20px;overflow:visible;
   position:relative;z-index:30;
 }
 .search-inner{padding:16px 16px 0}
