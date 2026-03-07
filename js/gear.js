@@ -1,3 +1,24 @@
+// ── Persistence ──
+const STORAGE_KEY = 'ulgear_data';
+
+function saveData() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    gears,
+    checkedIds: [...checkedIds],
+  }));
+}
+
+function loadData() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    gears = saved.gears || [];
+    checkedIds = new Set(saved.checkedIds || []);
+  } catch(e) {
+    gears = [];
+    checkedIds = new Set();
+  }
+}
+
 // ── State ──
 let gears = [];
 let checkedIds = new Set();
@@ -95,6 +116,7 @@ function toggleCat(cat) {
 // ── Add / Delete ──
 function addGear(gear) {
   gears.push({ id: Date.now(), ...gear });
+  saveData();
   updateStats();
   renderHome();
 }
@@ -103,6 +125,7 @@ function deleteGear(id) {
   const g = gears.find(x=>x.id===id);
   gears = gears.filter(x=>x.id!==id);
   checkedIds.delete(id);
+  saveData();
   updateStats();
   renderHome();
   if (g) snack(g.name+' を削除しました');
@@ -163,7 +186,7 @@ function saveEdit() {
   const id = parseInt(document.getElementById('editId').value);
   const g = gears.find(x=>x.id===id); if (!g) return;
   g.name = name; g.cat = cat; g.weight = weight; g.note = note;
-  closeEdit(); updateStats(); renderHome();
+  saveData(); closeEdit(); updateStats(); renderHome();
   snack('保存しました');
 }
 
@@ -197,10 +220,11 @@ function renderTrip() {
 
 function toggleCheck(id) {
   checkedIds.has(id) ? checkedIds.delete(id) : checkedIds.add(id);
+  saveData();
   renderTrip();
 }
 
-function clearChecks() { checkedIds.clear(); renderTrip(); }
+function clearChecks() { checkedIds.clear(); saveData(); renderTrip(); }
 
 function updateTripWeight() {
   const checked = gears.filter(g=>checkedIds.has(g.id));
@@ -224,5 +248,6 @@ function snack(msg) {
 }
 
 // ── Init ──
+loadData();
 updateStats();
 renderHome();
