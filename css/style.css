@@ -168,8 +168,8 @@ body{background:var(--bg);color:var(--on-surface);font-family:'Noto Sans JP',san
 .sm-btn .material-icons-round{font-size:15px}
 .sm-btn.edit{color:var(--on-surface-v)}
 .sm-btn.edit:hover{background:rgba(0,0,0,.06)}
-.sm-btn.del{color:var(--error)}
-.sm-btn.del:hover{background:rgba(207,102,121,.1)}
+.sm-btn.del{color:var(--on-surface-v)}
+.sm-btn.del:hover{background:rgba(0,0,0,.06)}
 .cat-add-btn{
   display:flex;align-items:center;
   width:20px;height:20px;border-radius:50%;border:none;
@@ -182,12 +182,11 @@ body{background:var(--bg);color:var(--on-surface);font-family:'Noto Sans JP',san
 
 /* ── Backpack full-width row ── */
 .backpack-section{width:100%;margin-bottom:12px}
-.backpack-row{display:flex;flex-wrap:wrap;gap:8px}
+.backpack-row{display:block}
 .backpack-item{
   display:flex;align-items:center;gap:8px;
-  padding:7px 12px;border-radius:10px;
-  background:var(--surface);border:1px solid var(--outline-v);
-  flex:1 1 160px;min-width:0;
+  padding:6px 4px;border-bottom:1px solid var(--outline-v);
+  background:transparent;
   animation:slideIn .25s ease both;
 }
 
