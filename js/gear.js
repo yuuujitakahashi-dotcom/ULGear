@@ -24,7 +24,7 @@ function switchTab(tab) {
 // ── Stats ──
 function updateStats() {
   const total = gears.reduce((s,g)=>s+g.weight, 0);
-  document.getElementById('statKg').textContent = (total/1000).toFixed(1);
+  document.getElementById('statKg').textContent = (total/1000).toFixed(3);
   const cnt = document.getElementById('secCount');
   cnt.textContent = gears.length > 0 ? gears.length+'件' : '';
 }
@@ -206,7 +206,7 @@ function updateTripWeight() {
   const checked = gears.filter(g=>checkedIds.has(g.id));
   const total = checked.reduce((s,g)=>s+g.weight, 0);
   document.getElementById('tripTotalG').textContent = total;
-  document.getElementById('tripTotalKg').textContent = total>0?`(${(total/1000).toFixed(2)} kg)`:'';
+  document.getElementById('tripTotalKg').textContent = total>0?`(${(total/1000).toFixed(3)} kg)`:'';
   const bd = {};
   checked.forEach(g => { if(!bd[g.cat]) bd[g.cat]=0; bd[g.cat]+=g.weight; });
   document.getElementById('breakdown').innerHTML = Object.entries(bd).length===0
