@@ -176,6 +176,19 @@ body{background:var(--bg);color:var(--on-surface);font-family:'Noto Sans JP',san
 .sm-btn.del{color:var(--error)}
 .sm-btn.del:hover{background:rgba(207,102,121,.1)}
 
+/* ── Backpack full-width row ── */
+.backpack-section{margin-bottom:10px}
+.backpack-row{
+  display:flex;flex-wrap:wrap;gap:8px;
+}
+.backpack-item{
+  display:flex;align-items:center;gap:8px;
+  padding:7px 12px;border-radius:10px;
+  background:var(--surface);border:1px solid var(--outline-v);
+  flex:1;min-width:180px;
+  animation:slideIn .25s ease both;
+}
+
 /* ── 3-column layout (PC) ── */
 .gear-columns{display:flex;flex-direction:column;gap:0}
 .gear-col-title{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--on-surface-v);padding:0 2px 8px}

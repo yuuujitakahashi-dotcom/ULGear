@@ -50,13 +50,13 @@ function updateStats() {
   cnt.textContent = gears.length > 0 ? gears.length+'件' : '';
 }
 
-// 3カラムのグループ定義
+// 3カラムのグループ定義（Backpackは別途フルwidth表示）
 const COL_GROUPS = [
   { label: 'Cook System',  cats: ['Cook', 'Food', 'Light'] },
-  { label: 'Sleep System', cats: ['Sleep', 'Backpack'] },
+  { label: 'Sleep System', cats: ['Sleep'] },
   { label: 'Clothing',     cats: ['Clothing', 'Footwear', 'Navigation', 'Safety', 'Other'] },
 ];
-const ALL_GROUPED_CATS = COL_GROUPS.flatMap(g => g.cats);
+const ALL_GROUPED_CATS = [...COL_GROUPS.flatMap(g => g.cats), 'Backpack'];
 
 function renderCatGroup(cat, items) {
   const catTotal = items.reduce((s,g)=>s+g.weight, 0);
@@ -107,6 +107,36 @@ function renderHome() {
     bycat[g.cat].push(g);
   });
 
+  // Backpack: フルwidth・横一列
+  const bpItems = bycat['Backpack'] || [];
+  const backpackHtml = bpItems.length > 0 ? `
+    <div class="backpack-section">
+      <div class="cat-group-header">
+        <span class="cat-badge">🎒</span>
+        <span class="cat-name">Backpack</span>
+        <span class="cat-total">${bpItems.reduce((s,g)=>s+g.weight,0)}g</span>
+      </div>
+      <div class="backpack-row">
+        ${bpItems.map((g,idx) => `
+          <div class="backpack-item" style="animation-delay:${idx*30}ms">
+            ${g.image ? `<img src="${g.image}" style="width:28px;height:28px;border-radius:5px;object-fit:cover;flex-shrink:0;border:1px solid var(--outline-v)" onerror="this.style.display='none'">` : ''}
+            <div class="gear-row-body">
+              <div class="gear-row-name">${g.name}</div>
+              ${g.note ? `<div class="gear-row-note">${g.note}</div>` : ''}
+            </div>
+            <div class="gear-row-right">
+              ${g.weight ? `<span class="weight-pill">${g.weight}g</span>` : ''}
+              <div class="row-actions">
+                <button class="sm-btn edit" onclick="openEdit(${g.id})"><span class="material-icons-round">edit</span></button>
+                <button class="sm-btn del" onclick="deleteGear(${g.id})"><span class="material-icons-round">delete</span></button>
+              </div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>` : '';
+
+  // 3カラム
   const columnsHtml = `<div class="gear-columns">
     ${COL_GROUPS.map(group => {
       const html = group.cats
@@ -120,13 +150,12 @@ function renderHome() {
     }).join('')}
   </div>`;
 
-  // グループ外のカテゴリ（想定外のカテゴリがあれば下に表示）
   const extras = Object.keys(bycat)
     .filter(c => !ALL_GROUPED_CATS.includes(c))
     .map(c => renderCatGroup(c, bycat[c]))
     .join('');
 
-  container.innerHTML = columnsHtml + extras;
+  container.innerHTML = backpackHtml + columnsHtml + extras;
 }
 
 function toggleCat(cat) {
