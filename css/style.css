@@ -134,12 +134,13 @@ body{background:var(--bg);color:var(--on-surface);font-family:'Noto Sans JP',san
 /* ── Category group ── */
 .cat-group{margin-bottom:4px}
 .cat-group-header{
-  display:flex;align-items:center;gap:6px;
+  display:flex;align-items:center;gap:4px;
   padding:6px 10px 4px;
 }
 .cat-badge{font-size:14px;flex-shrink:0}
-.cat-name{font-size:11px;font-weight:700;color:var(--on-surface-v);text-transform:uppercase;letter-spacing:.06em;flex:1}
-.cat-total{font-size:11px;font-weight:700;color:var(--on-surface-v)}
+.cat-name{font-size:11px;font-weight:700;color:var(--on-surface-v);text-transform:uppercase;letter-spacing:.06em}
+.cat-total{font-size:11px;font-weight:700;color:var(--on-surface-v);flex:1}
+
 
 /* ── Gear list item ── */
 .gear-row{
