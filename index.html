@@ -32,6 +32,7 @@
           <input type="text" id="searchInput" placeholder="商品URLを貼り付け…"
             autocomplete="off"
             oninput="onInput(this.value)"
+            onpaste="onPaste(event)"
             onkeydown="onKeydown(event)"
             onfocus="onFocus()"
             onblur="onBlur()">

@@ -11,7 +11,20 @@ function onInput(val) {
   clearTimeout(_debounce);
   if (!isUrl(val)) { closeDrop(); setLeadIcon('link'); return; }
   setLeadIcon('sync', true);
-  _debounce = setTimeout(() => fetchFromUrl(val.trim()), 400);
+  // URLの場合はペーストをすぐ検知して即実行、手入力は少し待つ
+  _debounce = setTimeout(() => fetchFromUrl(val.trim()), 100);
+}
+
+function onPaste(e) {
+  // ペーストは確定後の値で即実行
+  setTimeout(() => {
+    const val = document.getElementById('searchInput').value;
+    if (isUrl(val)) {
+      clearTimeout(_debounce);
+      setLeadIcon('sync', true);
+      fetchFromUrl(val.trim());
+    }
+  }, 0);
 }
 
 function onFocus() {}
@@ -40,7 +53,7 @@ function closeDrop() {
 }
 
 // ── CORS Proxy helpers ──
-async function fetchWithTimeout(url, ms = 8000) {
+async function fetchWithTimeout(url, ms = 6000) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), ms);
   try {
@@ -53,6 +66,7 @@ async function fetchWithTimeout(url, ms = 8000) {
 
 async function fetchHtml(targetUrl) {
   const enc = encodeURIComponent(targetUrl);
+  // 全プロキシを並列実行して最速のものを採用
   const proxies = [
     async () => {
       const r = await fetchWithTimeout(`https://corsproxy.io/?${enc}`);
@@ -71,10 +85,7 @@ async function fetchHtml(targetUrl) {
       return await r.text();
     },
   ];
-  for (const proxy of proxies) {
-    try { return await proxy(); } catch(e) { continue; }
-  }
-  throw new Error('all proxies failed');
+  return await Promise.any(proxies.map(fn => fn()));
 }
 
 // ── URL → Product Info ──
