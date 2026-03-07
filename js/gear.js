@@ -60,12 +60,10 @@ const ALL_GROUPED_CATS = [...COL_GROUPS.flatMap(g => g.cats), 'Backpack'];
 
 function renderCatGroup(cat, items) {
   const catTotal = items.reduce((s,g)=>s+g.weight, 0);
-  const icon = CAT_ICONS[cat] || '📦';
   const label = CAT_LABELS[cat] || cat;
   return `
   <div class="cat-group" id="catg-${cat}">
     <div class="cat-group-header">
-      <span class="cat-badge">${icon}</span>
       <span class="cat-name">${label}</span>
       <span class="cat-total">${catTotal}g</span>
     </div>
@@ -112,7 +110,6 @@ function renderHome() {
   const backpackHtml = bpItems.length > 0 ? `
     <div class="backpack-section">
       <div class="cat-group-header">
-        <span class="cat-badge">🎒</span>
         <span class="cat-name">Backpack</span>
         <span class="cat-total">${bpItems.reduce((s,g)=>s+g.weight,0)}g</span>
       </div>
@@ -255,7 +252,7 @@ function renderTrip() {
   gears.forEach(g => { if(!bycat[g.cat]) bycat[g.cat]=[]; bycat[g.cat].push(g); });
   container.innerHTML = Object.entries(bycat).map(([cat,items]) => `
     <div class="check-card">
-      <div class="check-cat-hdr">${CAT_ICONS[cat]||'📦'} ${CAT_LABELS[cat]||cat}</div>
+      <div class="check-cat-hdr">${CAT_LABELS[cat]||cat}</div>
       ${items.map(g => `
         <div class="check-row ${checkedIds.has(g.id)?'checked':''}" onclick="toggleCheck(${g.id})">
           <div class="checkbox"><span class="material-icons-round">check</span></div>
@@ -286,7 +283,7 @@ function updateTripWeight() {
   document.getElementById('breakdown').innerHTML = Object.entries(bd).length===0
     ? '<div style="color:var(--on-surface-v);font-size:13px">まだ選択されていません</div>'
     : Object.entries(bd).map(([c,w])=>`
-        <div class="bd-chip">${CAT_ICONS[c]||'📦'} ${CAT_LABELS[c]||c} <span class="bd-wt">${w}g</span></div>
+        <div class="bd-chip">${CAT_LABELS[c]||c} <span class="bd-wt">${w}g</span></div>
       `).join('');
 }
 
