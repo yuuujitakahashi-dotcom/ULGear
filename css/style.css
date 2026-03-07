@@ -141,21 +141,16 @@ body{background:var(--bg);color:var(--on-surface);font-family:'Noto Sans JP',san
 .cat-name{font-size:11px;font-weight:700;color:var(--on-surface-v);text-transform:uppercase;letter-spacing:.06em;flex:1}
 .cat-total{font-size:11px;font-weight:700;color:var(--on-surface-v)}
 
-.gear-list-wrap{
-  border:1px solid var(--outline-v);border-top:none;
-  border-radius:0 0 14px 14px;overflow:hidden;
-}
-
 /* ── Gear list item ── */
 .gear-row{
   display:flex;align-items:center;gap:8px;
-  padding:7px 12px;border-bottom:1px solid var(--outline-v);
-  background:var(--surface);transition:background .1s;
+  padding:6px 4px;border-bottom:1px solid var(--outline-v);
+  background:transparent;transition:background .1s;
   animation:slideIn .25s ease both;
 }
 @keyframes slideIn{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
 .gear-row:last-child{border-bottom:none}
-.gear-row:hover{background:var(--surface-2)}
+.gear-row:hover{background:rgba(0,0,0,.03)}
 .gear-row-body{flex:1;min-width:0;display:flex;align-items:baseline;gap:6px}
 .gear-row-name{font-size:13px;font-weight:500;color:var(--on-surface);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .gear-row-note{font-size:11px;color:var(--on-surface-v);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:1;min-width:0}
