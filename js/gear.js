@@ -50,6 +50,52 @@ function updateStats() {
   cnt.textContent = gears.length > 0 ? gears.length+'件' : '';
 }
 
+// 3カラムのグループ定義
+const COL_GROUPS = [
+  { label: 'Cook System',  cats: ['Cook', 'Food', 'Light'] },
+  { label: 'Sleep System', cats: ['Sleep', 'Backpack'] },
+  { label: 'Clothing',     cats: ['Clothing', 'Footwear', 'Navigation', 'Safety', 'Other'] },
+];
+const ALL_GROUPED_CATS = COL_GROUPS.flatMap(g => g.cats);
+
+function renderCatGroup(cat, items) {
+  const catTotal = items.reduce((s,g)=>s+g.weight, 0);
+  const icon = CAT_ICONS[cat] || '📦';
+  const label = CAT_LABELS[cat] || cat;
+  const collapsed = collapsedCats.has(cat);
+  return `
+  <div class="cat-group" id="catg-${cat}">
+    <div class="cat-group-header ${collapsed?'collapsed':''}" onclick="toggleCat('${cat}')">
+      <div class="cat-badge">${icon}</div>
+      <div class="cat-info">
+        <div class="cat-name">${label}</div>
+        <div class="cat-sub">${items.length}件</div>
+      </div>
+      <div class="cat-total">${catTotal}g</div>
+      <span class="material-icons-round cat-chevron">expand_more</span>
+    </div>
+    ${collapsed ? '' : `
+    <div class="gear-list-wrap">
+      ${items.map((g,idx) => `
+        <div class="gear-row" style="animation-delay:${idx*30}ms">
+          ${g.image ? `<img src="${g.image}" style="width:28px;height:28px;border-radius:5px;object-fit:cover;flex-shrink:0;border:1px solid var(--outline-v)" onerror="this.style.display='none'">` : ''}
+          <div class="gear-row-body">
+            <div class="gear-row-name">${g.name}</div>
+            ${g.note ? `<div class="gear-row-note">${g.note}</div>` : ''}
+          </div>
+          <div class="gear-row-right">
+            ${g.weight ? `<span class="weight-pill">${g.weight}g</span>` : ''}
+            <div class="row-actions">
+              <button class="sm-btn edit" onclick="openEdit(${g.id})"><span class="material-icons-round">edit</span></button>
+              <button class="sm-btn del" onclick="deleteGear(${g.id})"><span class="material-icons-round">delete</span></button>
+            </div>
+          </div>
+        </div>
+      `).join('')}
+    </div>`}
+  </div>`;
+}
+
 // ── Render gear list by category ──
 function renderHome() {
   const container = document.getElementById('gearByCat');
@@ -67,44 +113,26 @@ function renderHome() {
     bycat[g.cat].push(g);
   });
 
-  container.innerHTML = Object.entries(bycat).map(([cat, items]) => {
-    const catTotal = items.reduce((s,g)=>s+g.weight, 0);
-    const icon = CAT_ICONS[cat] || '📦';
-    const label = CAT_LABELS[cat] || cat;
-    const collapsed = collapsedCats.has(cat);
+  const columnsHtml = `<div class="gear-columns">
+    ${COL_GROUPS.map(group => {
+      const html = group.cats
+        .filter(c => bycat[c])
+        .map(c => renderCatGroup(c, bycat[c]))
+        .join('');
+      return `<div class="gear-column">
+        <div class="gear-col-title">${group.label}</div>
+        ${html || '<div class="gear-col-empty">なし</div>'}
+      </div>`;
+    }).join('')}
+  </div>`;
 
-    return `
-    <div class="cat-group" id="catg-${cat}">
-      <div class="cat-group-header ${collapsed?'collapsed':''}" onclick="toggleCat('${cat}')">
-        <div class="cat-badge">${icon}</div>
-        <div class="cat-info">
-          <div class="cat-name">${label}</div>
-          <div class="cat-sub">${items.length}件</div>
-        </div>
-        <div class="cat-total">${catTotal}g</div>
-        <span class="material-icons-round cat-chevron">expand_more</span>
-      </div>
-      ${collapsed ? '' : `
-      <div class="gear-list-wrap">
-        ${items.map((g,idx) => `
-          <div class="gear-row" style="animation-delay:${idx*30}ms">
-            ${g.image ? `<img src="${g.image}" style="width:28px;height:28px;border-radius:5px;object-fit:cover;flex-shrink:0;border:1px solid var(--outline-v)" onerror="this.style.display='none'">` : ''}
-            <div class="gear-row-body">
-              <div class="gear-row-name">${g.name}</div>
-              ${g.note ? `<div class="gear-row-note">${g.note}</div>` : ''}
-            </div>
-            <div class="gear-row-right">
-              ${g.weight ? `<span class="weight-pill">${g.weight}g</span>` : ''}
-              <div class="row-actions">
-                <button class="sm-btn edit" onclick="openEdit(${g.id})"><span class="material-icons-round">edit</span></button>
-                <button class="sm-btn del" onclick="deleteGear(${g.id})"><span class="material-icons-round">delete</span></button>
-              </div>
-            </div>
-          </div>
-        `).join('')}
-      </div>`}
-    </div>`;
-  }).join('');
+  // グループ外のカテゴリ（想定外のカテゴリがあれば下に表示）
+  const extras = Object.keys(bycat)
+    .filter(c => !ALL_GROUPED_CATS.includes(c))
+    .map(c => renderCatGroup(c, bycat[c]))
+    .join('');
+
+  container.innerHTML = columnsHtml + extras;
 }
 
 function toggleCat(cat) {
