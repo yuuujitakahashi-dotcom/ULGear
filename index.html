@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>山岳ギア管理</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- Top Bar -->
+<div class="top-bar">
+  <div class="top-bar-title" style="font-family:'Google Sans',sans-serif;font-size:20px;font-weight:300;letter-spacing:.5px;color:#1a1a1a">
+    UL Gear
+  </div>
+</div>
+
+<!-- Main content -->
+<div class="page">
+
+  <!-- ══ HOME PANEL ══ -->
+  <div class="panel active" id="panel-home">
+
+    <!-- Search hero -->
+    <div class="search-hero">
+      <div class="search-inner">
+        <div class="search-row" id="searchRow">
+          <span class="material-icons-round" id="searchLeadIcon">link</span>
+          <input type="text" id="searchInput" placeholder="商品URLを貼り付け…"
+            autocomplete="off"
+            oninput="onInput(this.value)"
+            onkeydown="onKeydown(event)"
+            onfocus="onFocus()"
+            onblur="onBlur()">
+        </div>
+        <div class="predict-drop" id="predictDrop"></div>
+      </div>
+      <div class="search-hint">
+        <span class="material-icons-round">tips_and_updates</span>
+        Amazon・モンベル・REIなどの商品URLを貼り付けると自動入力
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div style="display:flex;align-items:baseline;gap:6px;padding:4px 4px 20px">
+      <span style="font-family:'Google Sans',sans-serif;font-size:32px;font-weight:700;color:#1a1a1a;line-height:1" id="statKg">0.0</span>
+      <span style="font-size:14px;color:var(--on-surface-v);font-weight:500">kg total</span>
+    </div>
+
+    <!-- Gear list by category -->
+    <div class="sec-header">
+      <div class="sec-title">登録ギア</div>
+      <div class="sec-count" id="secCount"></div>
+    </div>
+    <div id="gearByCat"></div>
+
+  </div><!-- /home -->
+
+  <!-- ══ TRIP PANEL ══ -->
+  <div class="panel" id="panel-trip">
+    <div class="trip-hero">
+      <div class="trip-title">山行チェックリスト</div>
+      <div class="trip-sub">チェックしたギアの合計重量</div>
+      <div class="weight-display">
+        <span class="weight-big" id="tripTotalG">0</span>
+        <span class="weight-unit">g</span>
+        <span style="font-size:13px;opacity:.65;margin-left:8px" id="tripTotalKg"></span>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+      <div style="font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--on-surface-v)">持ち物</div>
+      <button class="btn-text" onclick="clearChecks()" style="font-size:13px">
+        <span class="material-icons-round" style="font-size:15px">restart_alt</span>リセット
+      </button>
+    </div>
+    <div id="tripList"></div>
+    <div style="font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--on-surface-v);margin:16px 0 10px">カテゴリ別</div>
+    <div class="breakdown" id="breakdown"></div>
+  </div>
+
+</div><!-- /page -->
+
+<!-- Bottom nav -->
+<nav class="nav-bar">
+  <button class="nav-item active" id="nav-home" onclick="switchTab('home')">
+    <div class="nav-ind"><span class="material-icons-round">home</span></div>
+    <span class="nav-lbl">ホーム</span>
+  </button>
+  <button class="nav-item" id="nav-trip" onclick="switchTab('trip')">
+    <div class="nav-ind"><span class="material-icons-round">checklist</span></div>
+    <span class="nav-lbl">山行</span>
+  </button>
+</nav>
+
+<!-- Edit / Add Dialog -->
+<div class="scrim" id="editScrim">
+  <div class="dialog">
+    <div class="dialog-title" id="editDialogTitle">ギアを編集</div>
+    <input type="hidden" id="editId">
+    <div class="tf" id="etf-name"><input type="text" id="eName" placeholder=" " oninput="tfInput(this)"><label>ギア名</label></div>
+    <div class="tf" id="etf-cat">
+      <select id="eCat" onchange="tfInput(this)">
+        <option value="">選択</option>
+        <option value="Sleep">😴 Sleep</option>
+        <option value="Cook">🍳 Cook</option>
+        <option value="Backpack">🎒 Backpack</option>
+        <option value="Clothing">👕 Clothing</option>
+        <option value="Footwear">👟 Footwear</option>
+        <option value="Navigation">🧭 Navigation</option>
+        <option value="Safety">🩹 Safety</option>
+        <option value="Food">🍱 Food & Water</option>
+        <option value="Light">🔦 Light</option>
+        <option value="Other">📦 Other</option>
+      </select>
+      <label>カテゴリ</label>
+    </div>
+    <div class="field-row">
+      <div class="tf"><input type="number" id="eWeight" placeholder=" " min="0" oninput="tfInput(this)"><label>重量 (g)</label></div>
+      <div class="tf"><input type="text" id="eNote" placeholder=" " oninput="tfInput(this)"><label>メモ</label></div>
+    </div>
+    <div class="dialog-actions">
+      <button class="btn-text" onclick="closeEdit()">キャンセル</button>
+      <button class="btn-filled" onclick="saveEdit()">保存</button>
+    </div>
+  </div>
+</div>
+
+<div class="snackbar" id="snackbar"></div>
+
+<script src="js/constants.js"></script>
+<script src="js/gear.js"></script>
+<script src="js/search.js"></script>
+</body>
+</html>
