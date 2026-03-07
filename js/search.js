@@ -39,6 +39,44 @@ function closeDrop() {
   document.getElementById('predictDrop').classList.remove('open');
 }
 
+// ── CORS Proxy helpers ──
+async function fetchWithTimeout(url, ms = 8000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
+  try {
+    const res = await fetch(url, { signal: controller.signal });
+    return res;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function fetchHtml(targetUrl) {
+  const enc = encodeURIComponent(targetUrl);
+  const proxies = [
+    async () => {
+      const r = await fetchWithTimeout(`https://corsproxy.io/?${enc}`);
+      if (!r.ok) throw new Error('corsproxy failed');
+      return await r.text();
+    },
+    async () => {
+      const r = await fetchWithTimeout(`https://api.allorigins.win/get?url=${enc}`);
+      const d = await r.json();
+      if (!d.contents) throw new Error('allorigins empty');
+      return d.contents;
+    },
+    async () => {
+      const r = await fetchWithTimeout(`https://api.codetabs.com/v1/proxy?quest=${enc}`);
+      if (!r.ok) throw new Error('codetabs failed');
+      return await r.text();
+    },
+  ];
+  for (const proxy of proxies) {
+    try { return await proxy(); } catch(e) { continue; }
+  }
+  throw new Error('all proxies failed');
+}
+
 // ── URL → Product Info ──
 async function fetchFromUrl(url) {
   const drop = document.getElementById('predictDrop');
@@ -53,10 +91,7 @@ async function fetchFromUrl(url) {
   openDrop();
 
   try {
-    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-    const res = await fetch(proxyUrl);
-    const data = await res.json();
-    const html = data.contents || '';
+    const html = await fetchHtml(url);
 
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
@@ -89,8 +124,11 @@ async function fetchFromUrl(url) {
 
   } catch(e) {
     drop.innerHTML = `<div style="padding:16px;text-align:center;color:var(--on-surface-v);font-size:13px">
-      <span class="material-icons-round" style="display:block;font-size:28px;color:var(--outline-v);margin-bottom:6px">wifi_off</span>
-      読み込めませんでした
+      <span class="material-icons-round" style="display:block;font-size:28px;color:var(--outline-v);margin-bottom:8px">wifi_off</span>
+      読み込めませんでした<br>
+      <button onclick="closeDrop();openNewGearDialog({})" style="margin-top:12px;height:36px;padding:0 16px;border-radius:999px;border:1px solid var(--outline);background:transparent;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;color:var(--primary)">
+        手動で入力する
+      </button>
     </div>`;
   }
   setLeadIcon('link');
