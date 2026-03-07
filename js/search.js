@@ -102,16 +102,30 @@ async function fetchFromUrl(url) {
   openDrop();
 
   try {
-    const html = await fetchHtml(url);
+    // AmazonはASIN直リンク+th=1でログイン不要の商品ページを取得しやすくなる
+    const fetchUrl = /amazon\.(co\.jp|com)/i.test(url)
+      ? url.replace(/[?#].*$/, '') + '?th=1&psc=1'
+      : url;
+    const html = await fetchHtml(fetchUrl);
 
     const parser = new DOMParser();
     const doc = parser.parseFromString(html, 'text/html');
 
-    const name     = getMeta(doc,'og:title') || doc.title || '';
-    const image    = getMeta(doc,'og:image') || '';
+    // 1. JSON-LD構造化データ（最も信頼性が高い）
+    const ld       = parseJsonLd(doc);
+    // 2. OGP / meta / Amazon専用セレクタ
+    const name     = ld?.name
+                  || getMeta(doc,'og:title')
+                  || getMeta(doc,'title')
+                  || doc.querySelector('#productTitle')?.textContent?.trim()
+                  || doc.title || '';
+    const image    = ld?.image
+                  || getMeta(doc,'og:image')
+                  || doc.querySelector('#landingImage')?.src
+                  || doc.querySelector('#imgBlkFront')?.src || '';
     const desc     = getMeta(doc,'og:description') || '';
     const bodyText = (doc.body ? doc.body.textContent : html) + ' ' + desc;
-    const weight   = extractWeightFromDom(doc) || extractWeight(bodyText);
+    const weight   = ld?.weight || extractWeightFromDom(doc) || extractWeight(bodyText);
     const cat      = guessCategory(name + ' ' + desc + ' ' + url + ' ' + bodyText.slice(0,800));
 
     const cleanedName = name.replace(/[\|｜].*$/, '').replace(/\s*[-–—].*$/, '').trim();
@@ -156,6 +170,30 @@ function getMeta(doc, prop) {
   const el = doc.querySelector(`meta[property="${prop}"]`) ||
              doc.querySelector(`meta[name="${prop}"]`);
   return el ? (el.getAttribute('content') || '') : '';
+}
+
+// JSON-LD構造化データからProduct情報を取得
+function parseJsonLd(doc) {
+  for (const script of doc.querySelectorAll('script[type="application/ld+json"]')) {
+    try {
+      const data = JSON.parse(script.textContent);
+      const items = Array.isArray(data) ? data : [data];
+      for (const item of items) {
+        const product = item['@type'] === 'Product' ? item
+          : item['@graph']?.find(n => n['@type'] === 'Product');
+        if (!product) continue;
+        const image = Array.isArray(product.image) ? product.image[0] : (product.image || '');
+        let weight = 0;
+        if (product.weight?.value) {
+          const unit = (product.weight.unitCode || product.weight.unitText || 'g').toLowerCase();
+          const v = parseFloat(product.weight.value);
+          weight = unit.includes('kg') ? Math.round(v * 1000) : Math.round(v);
+        }
+        return { name: product.name || '', image, weight };
+      }
+    } catch(e) {}
+  }
+  return null;
 }
 
 // DOM構造（仕様表・定義リスト）から重量を抽出
