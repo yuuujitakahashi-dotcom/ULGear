@@ -62,19 +62,13 @@ function renderCatGroup(cat, items) {
   const catTotal = items.reduce((s,g)=>s+g.weight, 0);
   const icon = CAT_ICONS[cat] || '📦';
   const label = CAT_LABELS[cat] || cat;
-  const collapsed = collapsedCats.has(cat);
   return `
   <div class="cat-group" id="catg-${cat}">
-    <div class="cat-group-header ${collapsed?'collapsed':''}" onclick="toggleCat('${cat}')">
-      <div class="cat-badge">${icon}</div>
-      <div class="cat-info">
-        <div class="cat-name">${label}</div>
-        <div class="cat-sub">${items.length}件</div>
-      </div>
-      <div class="cat-total">${catTotal}g</div>
-      <span class="material-icons-round cat-chevron">expand_more</span>
+    <div class="cat-group-header">
+      <span class="cat-badge">${icon}</span>
+      <span class="cat-name">${label}</span>
+      <span class="cat-total">${catTotal}g</span>
     </div>
-    ${collapsed ? '' : `
     <div class="gear-list-wrap">
       ${items.map((g,idx) => `
         <div class="gear-row" style="animation-delay:${idx*30}ms">
@@ -92,7 +86,7 @@ function renderCatGroup(cat, items) {
           </div>
         </div>
       `).join('')}
-    </div>`}
+    </div>
   </div>`;
 }
 

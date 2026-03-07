@@ -132,30 +132,14 @@ body{background:var(--bg);color:var(--on-surface);font-family:'Noto Sans JP',san
 .sec-count{font-size:12px;color:var(--outline);font-weight:500}
 
 /* ── Category group ── */
-.cat-group{margin-bottom:8px;overflow:hidden}
+.cat-group{margin-bottom:4px}
 .cat-group-header{
-  display:flex;align-items:center;gap:10px;
-  padding:10px 14px;background:var(--surface-1);
-  cursor:pointer;user-select:none;
-  border-radius:14px 14px 0 0;
-  border:1px solid var(--outline-v);border-bottom:none;
-  transition:background .15s;
+  display:flex;align-items:center;gap:6px;
+  padding:6px 10px 4px;
 }
-.cat-group-header:hover{background:var(--surface-2)}
-.cat-group-header.collapsed{border-radius:14px;border-bottom:1px solid var(--outline-v)}
-.cat-badge{
-  width:36px;height:36px;border-radius:10px;background:var(--primary-container);
-  display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;
-}
-.cat-info{flex:1}
-.cat-name{font-size:14px;font-weight:700;color:var(--on-surface)}
-.cat-sub{font-size:12px;color:var(--on-surface-v);margin-top:1px}
-.cat-total{
-  font-size:13px;font-weight:700;color:var(--primary);
-  background:var(--primary-container);border-radius:999px;padding:3px 10px;
-}
-.cat-chevron{color:var(--on-surface-v);font-size:20px;transition:transform .2s}
-.cat-group-header.collapsed .cat-chevron{transform:rotate(-90deg)}
+.cat-badge{font-size:14px;flex-shrink:0}
+.cat-name{font-size:11px;font-weight:700;color:var(--on-surface-v);text-transform:uppercase;letter-spacing:.06em;flex:1}
+.cat-total{font-size:11px;font-weight:700;color:var(--on-surface-v)}
 
 .gear-list-wrap{
   border:1px solid var(--outline-v);border-top:none;
