@@ -88,7 +88,7 @@ function renderHome() {
       <div class="gear-list-wrap">
         ${items.map((g,idx) => `
           <div class="gear-row" style="animation-delay:${idx*30}ms">
-            ${g.image ? `<img src="${g.image}" style="width:44px;height:44px;border-radius:8px;object-fit:cover;flex-shrink:0;border:1px solid var(--outline-v)" onerror="this.style.display='none'">` : ''}
+            ${g.image ? `<img src="${g.image}" style="width:28px;height:28px;border-radius:5px;object-fit:cover;flex-shrink:0;border:1px solid var(--outline-v)" onerror="this.style.display='none'">` : ''}
             <div class="gear-row-body">
               <div class="gear-row-name">${g.name}</div>
               ${g.note ? `<div class="gear-row-note">${g.note}</div>` : ''}
@@ -96,8 +96,8 @@ function renderHome() {
             <div class="gear-row-right">
               ${g.weight ? `<span class="weight-pill">${g.weight}g</span>` : ''}
               <div class="row-actions">
-                <button class="sm-btn edit" onclick="openEdit(${g.id})">編集</button>
-                <button class="sm-btn del" onclick="deleteGear(${g.id})">削除</button>
+                <button class="sm-btn edit" onclick="openEdit(${g.id})"><span class="material-icons-round">edit</span></button>
+                <button class="sm-btn del" onclick="deleteGear(${g.id})"><span class="material-icons-round">delete</span></button>
               </div>
             </div>
           </div>
