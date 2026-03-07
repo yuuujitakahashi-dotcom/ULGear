@@ -101,7 +101,7 @@ async function fetchFromUrl(url) {
     const desc     = getMeta(doc,'og:description') || '';
     const bodyText = (doc.body ? doc.body.textContent : html) + ' ' + desc;
     const weight   = extractWeightFromDom(doc) || extractWeight(bodyText);
-    const cat      = guessCategory(name + ' ' + desc + ' ' + bodyText.slice(0,500));
+    const cat      = guessCategory(name + ' ' + desc + ' ' + url + ' ' + bodyText.slice(0,800));
 
     const cleanedName = name.replace(/[\|｜].*$/, '').replace(/\s*[-–—].*$/, '').trim();
 
@@ -198,14 +198,16 @@ function extractWeight(text) {
 
 function guessCategory(text) {
   const t = text.toLowerCase();
-  if (/テント|シュラフ|寝袋|スリーピング|マット|sleeping|tent|pad/.test(t)) return 'Sleep';
-  if (/クッカー|バーナー|コンロ|stove|cook|pot|pan/.test(t)) return 'Cook';
-  if (/バックパック|ザック|リュック|pack/.test(t)) return 'Backpack';
-  if (/ジャケット|パンツ|シャツ|ウェア|フリース|jacket|pants|shirt|fleece/.test(t)) return 'Clothing';
-  if (/シューズ|ブーツ|トレイル|shoe|boot/.test(t)) return 'Footwear';
-  if (/ヘッドランプ|ランタン|headlamp|lantern|light/.test(t)) return 'Light';
-  if (/コンパス|gps|地図|map|navigation/.test(t)) return 'Navigation';
-  if (/食料|フード|water|hydration|filter/.test(t)) return 'Food';
-  if (/救急|first.aid|safety|whistle/.test(t)) return 'Safety';
+  const match = (pat) => pat.test(t);
+
+  if (match(/テント|シュラフ|寝袋|スリーピングバッグ|スリーピングマット|マット|タープ|ビビー|ツェルト|tent|sleeping.?bag|sleep.?mat|bivy|bivouac|tarp|groundsheet/)) return 'Sleep';
+  if (match(/クッカー|バーナー|コンロ|ストーブ|ケトル|飯盒|アルコールバーナー|stove|cooker|cookset|cook.?pot|pot|pan|kettle|canister|fuel.?can|アルコール炉/)) return 'Cook';
+  if (match(/バックパック|ザック|リュック|ハイドレーション|backpack|rucksack|daypack|frameless.?pack|ultralight.?pack/)) return 'Backpack';
+  if (match(/ジャケット|パンツ|ズボン|シャツ|ウェア|フリース|ダウン|レインウェア|ハードシェル|ソフトシェル|グローブ|手袋|帽子|ニット|バラクラバ|ゲイター|ソックス|靴下|ベースレイヤー|タイツ|ロングスリーブ|jacket|pants|trousers|shirt|fleece|down.?jacket|rain.?jacket|hardshell|softshell|glove|hat|cap|beanie|balaclava|sock|baselayer|midlayer|insulated/)) return 'Clothing';
+  if (match(/シューズ|ブーツ|トレイルランニング|トレラン|インソール|アプローチ|shoe|boot|trail.?runner|approach|insole|footwear/)) return 'Footwear';
+  if (match(/ヘッドランプ|ランタン|ライト|懐中電灯|headlamp|lantern|flashlight|torch|beacon.?light/)) return 'Light';
+  if (match(/コンパス|gps|地図|マップ|高度計|腕時計|サーモメーター|compass|map|altimeter|gps.?watch|navigation|barometer/)) return 'Navigation';
+  if (match(/食料|フード|行動食|レーション|水筒|ボトル|浄水器|フィルター|プラティパス|ハイドレーション|food|ration|energy.?bar|water.?bottle|hydration|water.?filter|purifier/)) return 'Food';
+  if (match(/救急|ファーストエイド|ホイッスル|ビーコン|エマージェンシー|ツェルト|サバイバル|ファイヤースターター|first.?aid|whistle|emergency|beacon|survival|fire.?starter|shelter.?sheet/)) return 'Safety';
   return 'Other';
 }
