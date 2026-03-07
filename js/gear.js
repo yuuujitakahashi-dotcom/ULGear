@@ -66,6 +66,7 @@ function renderCatGroup(cat, items) {
     <div class="cat-group-header">
       <span class="cat-name">${label}</span>
       <span class="cat-total">${catTotal}g</span>
+      <button class="cat-add-btn" onclick="openNewGearDialog({cat:'${cat}'})"><span class="material-icons-round">add</span></button>
     </div>
     <div class="gear-list-wrap">
       ${items.map((g,idx) => `
@@ -84,7 +85,6 @@ function renderCatGroup(cat, items) {
           </div>
         </div>
       `).join('')}
-      <button class="cat-add-btn" onclick="openNewGearDialog({cat:'${cat}'})"><span class="material-icons-round">add</span></button>
     </div>
   </div>`;
 }
@@ -113,6 +113,7 @@ function renderHome() {
       <div class="cat-group-header">
         <span class="cat-name">Backpack</span>
         <span class="cat-total">${bpItems.reduce((s,g)=>s+g.weight,0)}g</span>
+        <button class="cat-add-btn" onclick="openNewGearDialog({cat:'Backpack'})"><span class="material-icons-round">add</span></button>
       </div>
       <div class="backpack-row">
         ${bpItems.map((g,idx) => `
@@ -131,7 +132,6 @@ function renderHome() {
             </div>
           </div>
         `).join('')}
-        <button class="cat-add-btn" onclick="openNewGearDialog({cat:'Backpack'})"><span class="material-icons-round">add</span></button>
       </div>
     </div>` : '';
 
