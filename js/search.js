@@ -247,16 +247,105 @@ function extractWeight(text) {
 
 function guessCategory(text) {
   const t = text.toLowerCase();
-  const match = (pat) => pat.test(t);
 
-  if (match(/テント|シュラフ|寝袋|スリーピングバッグ|スリーピングマット|マット|タープ|ビビー|ツェルト|tent|sleeping.?bag|sleep.?mat|bivy|bivouac|tarp|groundsheet/)) return 'Sleep';
-  if (match(/クッカー|バーナー|コンロ|ストーブ|ケトル|飯盒|アルコールバーナー|stove|cooker|cookset|cook.?pot|pot|pan|kettle|canister|fuel.?can|アルコール炉/)) return 'Cook';
-  if (match(/バックパック|ザック|リュック|ハイドレーション|backpack|rucksack|daypack|frameless.?pack|ultralight.?pack/)) return 'Backpack';
-  if (match(/ジャケット|パンツ|ズボン|シャツ|ウェア|フリース|ダウン|レインウェア|ハードシェル|ソフトシェル|グローブ|手袋|帽子|ニット|バラクラバ|ゲイター|ソックス|靴下|ベースレイヤー|タイツ|ロングスリーブ|jacket|pants|trousers|shirt|fleece|down.?jacket|rain.?jacket|hardshell|softshell|glove|hat|cap|beanie|balaclava|sock|baselayer|midlayer|insulated/)) return 'Clothing';
-  if (match(/シューズ|ブーツ|トレイルランニング|トレラン|インソール|アプローチ|shoe|boot|trail.?runner|approach|insole|footwear/)) return 'Footwear';
-  if (match(/ヘッドランプ|ランタン|ライト|懐中電灯|headlamp|lantern|flashlight|torch|beacon.?light/)) return 'Light';
-  if (match(/コンパス|gps|地図|マップ|高度計|腕時計|サーモメーター|compass|map|altimeter|gps.?watch|navigation|barometer/)) return 'Navigation';
-  if (match(/食料|フード|行動食|レーション|水筒|ボトル|浄水器|フィルター|プラティパス|ハイドレーション|food|ration|energy.?bar|water.?bottle|hydration|water.?filter|purifier/)) return 'Food';
-  if (match(/救急|ファーストエイド|ホイッスル|ビーコン|エマージェンシー|ツェルト|サバイバル|ファイヤースターター|first.?aid|whistle|emergency|beacon|survival|fire.?starter|shelter.?sheet/)) return 'Safety';
-  return 'Other';
+  // [正規表現, スコア] ブランド名=10、固有商品名=8〜9、汎用語=3〜5
+  const RULES = {
+    Sleep: [
+      [/nemo|big.?agnes|therm.?a.?rest/, 10],
+      [/シュラフ|寝袋|sleeping.?bag/, 9],
+      [/テント(?!.*バッグ)|tent(?!\w)(?!.*bag)/, 9],
+      [/タープ|tarp(?!\w)|ビビー|bivy|bivouac/, 8],
+      [/ツェルト|groundsheet|グランドシート/, 7],
+      [/スリーピングマット|sleeping.?mat|sleep.?pad/, 9],
+      [/マット(?!リョク)(?!レス)/, 3],
+      [/ピロー|pillow(?!\w)/, 4],
+    ],
+    Cook: [
+      [/jetboil|trangia|primus|soto(?!\w)/, 10],
+      [/クッカー|cooker|cookset|cook.?pot/, 9],
+      [/バーナー|stove(?!\w)/, 9],
+      [/ケトル|kettle(?!\w)|飯盒/, 8],
+      [/アルコールストーブ|alcohol.?stove|アルコールバーナー/, 8],
+      [/カニスター|canister(?!\w)|od缶|ガス缶|fuel.?can/, 7],
+      [/クッキング|cooking/, 5],
+      [/pot(?!\w)|pan(?!\w)/, 3],
+    ],
+    Backpack: [
+      [/osprey|gregory|hyperlite|gossamer|パーゴワークス/, 10],
+      [/バックパック|backpack(?!\w)/, 9],
+      [/ザック(?!リ)|rucksack/, 9],
+      [/リュック|daypack/, 6],
+      [/フレームレス|frameless/, 7],
+      [/ultralight.*pack|ウルトラライト.*パック/, 7],
+      [/pack(?!\w)(?!age)(?!et)/, 3],
+    ],
+    Clothing: [
+      [/arc.?teryx|patagonia|mammut|rab(?!\w)|norrona/, 8],
+      [/レインウェア|rain.?jacket|rain.?wear/, 9],
+      [/ハードシェル|hardshell|ソフトシェル|softshell/, 9],
+      [/ジャケット|jacket(?!\w)/, 8],
+      [/フリース|fleece(?!\w)/, 8],
+      [/ダウンジャケット|down.?jacket/, 9],
+      [/ベースレイヤー|baselayer|base.?layer/, 8],
+      [/ミドルレイヤー|mid.?layer|インサレーション|insulated/, 7],
+      [/グローブ|手袋|glove(?!\w)/, 7],
+      [/パンツ(?!リ)|ズボン|trousers|pants(?!\w)/, 6],
+      [/シャツ|shirt(?!\w)/, 5],
+      [/帽子|hat(?!\w)|beanie|バラクラバ|balaclava/, 6],
+      [/ソックス|靴下|sock(?!\w)/, 6],
+      [/タイツ|tights(?!\w)|レギンス|leggings/, 6],
+    ],
+    Footwear: [
+      [/salomon|hoka|la.?sportiva|scarpa|merrell|inov.?8/, 10],
+      [/トレイルランニングシューズ|trail.?running.?shoe/, 10],
+      [/トレイルシューズ|trail.?shoe|トレランシューズ/, 9],
+      [/アプローチシューズ|approach.?shoe/, 9],
+      [/シューズ(?!店)|shoe(?!\w)/, 7],
+      [/ブーツ|boot(?!\w)/, 7],
+      [/トレラン(?!\w)/, 8],
+      [/インソール|insole|footwear/, 6],
+      [/ゲイター|スパッツ|gaiter/, 5],
+    ],
+    Light: [
+      [/petzl|ledlenser|fenix(?!\w)/, 10],
+      [/ヘッドランプ|headlamp/, 10],
+      [/ランタン|lantern(?!\w)/, 8],
+      [/懐中電灯|flashlight|torch(?!\w)/, 7],
+      [/ライト(?!ウェイト)(?!ウェア)|light(?!\w)(?!weight)(?!ly)/, 4],
+    ],
+    Navigation: [
+      [/garmin|suunto|silva(?!\w)/, 10],
+      [/コンパス|compass(?!\w)/, 9],
+      [/gpsウォッチ|gps.?watch/, 10],
+      [/高度計|altimeter|気圧計|barometer/, 8],
+      [/地図|マップ|topo.?map|topographic/, 6],
+      [/navigation|ナビゲーション/, 5],
+    ],
+    Food: [
+      [/platypus|sawyer|katadyn|lifestraw|プラティパス/, 10],
+      [/浄水器|water.?filter|water.?purifier/, 9],
+      [/フリーズドライ|freeze.?dried/, 9],
+      [/行動食|レーション|ration(?!\w)/, 8],
+      [/水筒|ウォーターボトル|water.?bottle/, 7],
+      [/ハイドレーション(?!.*ザック)|hydration.?bladder/, 7],
+      [/フィルター|filter(?!\w)/, 4],
+      [/food(?!\w)|食料/, 4],
+    ],
+    Safety: [
+      [/ortovox|mammut.*beacon|pieps/, 10],
+      [/ビーコン|avalanche.?beacon|アバランチ/, 10],
+      [/ファーストエイド|first.?aid|救急キット/, 9],
+      [/ホイッスル|whistle(?!\w)/, 8],
+      [/エマージェンシー|emergency(?!\w)/, 7],
+      [/ファイヤースターター|fire.?starter/, 7],
+      [/サバイバル|survival/, 6],
+    ],
+  };
+
+  let best = { cat: 'Other', score: 0 };
+  for (const [cat, rules] of Object.entries(RULES)) {
+    const score = rules.reduce((sum, [pat, w]) => sum + (pat.test(t) ? w : 0), 0);
+    if (score > best.score) best = { cat, score };
+  }
+  return best.cat;
 }
