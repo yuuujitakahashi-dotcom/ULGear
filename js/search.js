@@ -100,7 +100,7 @@ async function fetchFromUrl(url) {
     const image    = getMeta(doc,'og:image') || '';
     const desc     = getMeta(doc,'og:description') || '';
     const bodyText = (doc.body ? doc.body.textContent : html) + ' ' + desc;
-    const weight   = extractWeight(bodyText);
+    const weight   = extractWeightFromDom(doc) || extractWeight(bodyText);
     const cat      = guessCategory(name + ' ' + desc + ' ' + bodyText.slice(0,500));
 
     const cleanedName = name.replace(/[\|｜].*$/, '').replace(/\s*[-–—].*$/, '').trim();
@@ -147,26 +147,51 @@ function getMeta(doc, prop) {
   return el ? (el.getAttribute('content') || '') : '';
 }
 
-function extractWeight(text) {
-  const gPats = [
-    /重量[^\d]{0,6}(\d+(?:\.\d+)?)\s*g(?!\/)/i,
-    /重さ[^\d]{0,6}(\d+(?:\.\d+)?)\s*g(?!\/)/i,
-    /ウェイト[^\d]{0,6}(\d+(?:\.\d+)?)\s*g(?!\/)/i,
-    /Weight[:\s]{0,4}(\d+(?:\.\d+)?)\s*g/i,
-    /(\d+(?:\.\d+)?)\s*g[（(]/,
-  ];
-  for (const p of gPats) {
-    const m = text.match(p);
-    if (m) { const v = parseFloat(m[1]); if (v > 0 && v < 50000) return Math.round(v); }
+// DOM構造（仕様表・定義リスト）から重量を抽出
+function extractWeightFromDom(doc) {
+  const KEY = /重量|重さ|本体重量|商品重量|ウェイト|Weight|Wt\./i;
+
+  // dt/dd 形式
+  for (const dt of doc.querySelectorAll('dt')) {
+    if (KEY.test(dt.textContent)) {
+      const dd = dt.nextElementSibling;
+      if (dd) { const v = extractWeight(dd.textContent); if (v > 0) return v; }
+    }
   }
-  const kgPats = [
-    /重量[^\d]{0,6}(\d+(?:\.\d+)?)\s*kg/i,
-    /重さ[^\d]{0,6}(\d+(?:\.\d+)?)\s*kg/i,
-    /Weight[:\s]{0,4}(\d+(?:\.\d+)?)\s*kg/i,
+
+  // th/td 形式（仕様表）
+  for (const th of doc.querySelectorAll('th, td')) {
+    const txt = th.textContent.trim();
+    if (KEY.test(txt) && txt.length < 25) {
+      const td = th.nextElementSibling;
+      if (td) { const v = extractWeight(td.textContent); if (v > 0) return v; }
+    }
+  }
+
+  return 0;
+}
+
+// テキストから重量を正規表現で抽出
+function extractWeight(text) {
+  // [パターン, 単位をgに変換する倍率]
+  const pats = [
+    [/(?:重量|重さ|本体重量|商品重量|ウェイト)[^\d]{0,12}約?\s*([\d,]+(?:\.\d+)?)\s*g(?!\/)/i, 1],
+    [/(?:Weight|Wt\.?)[:\s]{0,6}([\d,]+(?:\.\d+)?)\s*g(?!\s*\/)/i, 1],
+    [/[Ww]eighs?\s+([\d,]+(?:\.\d+)?)\s*g/i, 1],
+    [/([\d,]+(?:\.\d+)?)\s*g\s*[（([\s]/i, 1],
+    [/(?:重量|重さ|本体重量|商品重量|ウェイト)[^\d]{0,12}約?\s*([\d,]+(?:\.\d+)?)\s*kg/i, 1000],
+    [/(?:Weight|Wt\.?)[:\s]{0,6}([\d,]+(?:\.\d+)?)\s*kg/i, 1000],
+    [/(?:Weight|Wt\.?)[:\s]{0,6}([\d,]+(?:\.\d+)?)\s*(?:lbs?|pounds?)/i, 453.592],
+    [/(?:Weight|Wt\.?)[:\s]{0,6}([\d,]+(?:\.\d+)?)\s*oz/i, 28.3495],
   ];
-  for (const p of kgPats) {
-    const m = text.match(p);
-    if (m) { const v = parseFloat(m[1]); if (v > 0 && v < 50) return Math.round(v * 1000); }
+
+  for (const [pat, mult] of pats) {
+    const m = text.match(pat);
+    if (m) {
+      const v = parseFloat(m[1].replace(/,/g, ''));
+      const grams = Math.round(v * mult);
+      if (grams > 0 && grams < 50000) return grams;
+    }
   }
   return 0;
 }
