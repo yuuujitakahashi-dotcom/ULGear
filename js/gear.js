@@ -144,8 +144,7 @@ function renderHome() {
         .map(c => renderCatGroup(c, bycat[c]))
         .join('');
       return `<div class="gear-column">
-        <div class="gear-col-title">${group.label}</div>
-        ${html || '<div class="gear-col-empty">なし</div>'}
+        ${html}
       </div>`;
     }).join('')}
   </div>`;
