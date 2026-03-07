@@ -84,6 +84,7 @@ function renderCatGroup(cat, items) {
           </div>
         </div>
       `).join('')}
+      <button class="cat-add-btn" onclick="openNewGearDialog({cat:'${cat}'})"><span class="material-icons-round">add</span></button>
     </div>
   </div>`;
 }
@@ -130,6 +131,7 @@ function renderHome() {
             </div>
           </div>
         `).join('')}
+        <button class="cat-add-btn" onclick="openNewGearDialog({cat:'Backpack'})"><span class="material-icons-round">add</span></button>
       </div>
     </div>` : '';
 

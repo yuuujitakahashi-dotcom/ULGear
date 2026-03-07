@@ -175,6 +175,16 @@ body{background:var(--bg);color:var(--on-surface);font-family:'Noto Sans JP',san
 .sm-btn.edit:hover{background:rgba(0,0,0,.06)}
 .sm-btn.del{color:var(--error)}
 .sm-btn.del:hover{background:rgba(207,102,121,.1)}
+.cat-add-btn{
+  display:flex;align-items:center;gap:4px;
+  width:100%;padding:5px 12px;margin-top:2px;
+  border:1px dashed var(--outline-v);border-radius:8px;
+  background:transparent;cursor:pointer;
+  color:var(--on-surface-v);font-size:12px;
+  transition:background .15s,color .15s;
+}
+.cat-add-btn:hover{background:rgba(0,0,0,.04);color:var(--primary)}
+.cat-add-btn .material-icons-round{font-size:14px}
 
 /* ── Backpack full-width row ── */
 .backpack-section{width:100%;margin-bottom:12px}
