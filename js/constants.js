@@ -1,10 +1,7 @@
 const CAT_ICONS = {
-  Sleep:'😴', Cook:'🍳', Backpack:'🎒', Clothing:'👕', Footwear:'👟',
-  Navigation:'🧭', Safety:'🩹', Food:'🍱', Light:'🔦', Other:'📦'
+  Sleep:'😴', Cook:'🍳', Backpack:'🎒', Clothing:'👕',
+  Safety:'🩹', Food:'🍱', Light:'🔦', Other:'📦'
 };
 
-const CAT_LABELS = {
-  Sleep:'Sleep', Cook:'Cook', Backpack:'Backpack', Clothing:'Clothing',
-  Footwear:'Footwear', Navigation:'Navigation', Safety:'Safety',
-  Food:'Food & Water', Light:'Light', Other:'Other'
-};
+// CAT_LABELS は gear.js の loadCategories() で動的に構築される
+const CAT_LABELS = {};

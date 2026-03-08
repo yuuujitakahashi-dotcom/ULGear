@@ -16,8 +16,25 @@
   <div class="top-bar-title" style="font-family:'Google Sans',sans-serif;font-size:20px;font-weight:300;letter-spacing:.5px;color:#1a1a1a">
     MyULGear
   </div>
+  <div class="top-bar-search">
+    <div class="search-row" id="searchRow">
+      <span class="material-icons-round" id="searchLeadIcon">link</span>
+      <input type="text" id="searchInput" placeholder="商品URLを貼り付け"
+        autocomplete="off"
+        oninput="onInput(this.value)"
+        onpaste="onPaste(event)"
+        onkeydown="onKeydown(event)"
+        onfocus="onFocus()"
+        onblur="onBlur()">
+    </div>
+    <div class="predict-drop" id="predictDrop"></div>
+  </div>
   <button class="icon-btn" onclick="openNewGearDialog({})" title="手動で追加">
     <span class="material-icons-round">add</span>
+  </button>
+  <button class="icon-btn account-btn" onclick="openAccount()">
+    <span class="material-icons-round" id="accountIcon">account_circle</span>
+    <img id="accountIconImg" style="display:none;width:32px;height:32px;border-radius:50%;object-fit:cover">
   </button>
 </div>
 
@@ -27,35 +44,51 @@
   <!-- ══ HOME PANEL ══ -->
   <div class="panel active" id="panel-home">
 
-    <!-- Search hero -->
-    <div class="search-hero">
-      <div class="search-inner">
-        <div class="search-row" id="searchRow">
-          <span class="material-icons-round" id="searchLeadIcon">link</span>
-          <input type="text" id="searchInput" placeholder="商品URLを貼り付け…"
-            autocomplete="off"
-            oninput="onInput(this.value)"
-            onpaste="onPaste(event)"
-            onkeydown="onKeydown(event)"
-            onfocus="onFocus()"
-            onblur="onBlur()">
-        </div>
-        <div class="predict-drop" id="predictDrop"></div>
+    <!-- List tabs -->
+    <div class="list-tabs" id="listTabs"></div>
+
+    <!-- Gear list title + stats -->
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px">
+      <div id="listTitle" contenteditable="true" spellcheck="false"
+        style="font-size:24px;font-weight:500;color:var(--on-surface);outline:none;cursor:text"
+        oninput="saveListTitle()"
+        onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}"
+      ></div>
+      <button onclick="const el=document.getElementById('listTitle');el.focus();const r=document.createRange();r.selectNodeContents(el);r.collapse(false);const s=window.getSelection();s.removeAllRanges();s.addRange(r)" style="display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;border:none;background:transparent;cursor:pointer;color:var(--on-surface-v)">
+        <span class="material-icons-round" style="font-size:15px">edit</span>
+      </button>
+      <div style="flex:1"></div>
+      <div style="display:flex;align-items:baseline;gap:3px">
+        <span style="font-size:11px;color:var(--on-surface-v);margin-right:2px">合計</span>
+        <span style="font-size:26px;font-weight:500;color:var(--on-surface);line-height:1" id="statKg">0.00</span>
+        <span style="font-size:12px;color:var(--on-surface-v);font-weight:400">kg</span>
       </div>
     </div>
 
-    <!-- Stats -->
-    <div style="display:flex;align-items:baseline;gap:6px;padding:4px 4px 20px">
-      <span style="font-family:'Google Sans',sans-serif;font-size:32px;font-weight:700;color:#1a1a1a;line-height:1" id="statKg">0.0</span>
-      <span style="font-size:14px;color:var(--on-surface-v);font-weight:500">g total</span>
+    <!-- List info -->
+    <div id="listInfo"></div>
+
+    <!-- Skeleton loading -->
+    <div id="skeleton">
+      <div class="sk-title-row">
+        <div class="sk-block" style="width:140px;height:28px;border-radius:6px"></div>
+        <div class="sk-block" style="width:60px;height:24px;border-radius:6px;margin-left:auto"></div>
+      </div>
+      <div class="sk-section" style="margin-bottom:20px">
+        <div class="sk-block sk-cat" style="width:80px"></div>
+        <div class="sk-block sk-row" style="width:100%"></div>
+        <div class="sk-block sk-row" style="width:88%"></div>
+        <div class="sk-block sk-row" style="width:94%"></div>
+      </div>
+      <div class="sk-section">
+        <div class="sk-block sk-cat" style="width:60px"></div>
+        <div class="sk-block sk-row" style="width:100%"></div>
+        <div class="sk-block sk-row" style="width:76%"></div>
+      </div>
     </div>
 
     <!-- Gear list by category -->
-    <div class="sec-header">
-      <div class="sec-title">登録ギア</div>
-      <div class="sec-count" id="secCount"></div>
-    </div>
-    <div id="gearByCat"></div>
+    <div id="gearByCat" style="display:none"></div>
 
   </div><!-- /home -->
 
@@ -70,63 +103,160 @@
       </div>
     </div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-      <div style="font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--on-surface-v)">持ち物</div>
+      <div style="font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--on-surface-v)">持ち物</div>
       <button class="btn-text" onclick="clearChecks()" style="font-size:13px">
         <span class="material-icons-round" style="font-size:15px">restart_alt</span>リセット
       </button>
     </div>
     <div id="tripList"></div>
-    <div style="font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--on-surface-v);margin:16px 0 10px">カテゴリ別</div>
+    <div style="font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--on-surface-v);margin:16px 0 10px">カテゴリ別</div>
     <div class="breakdown" id="breakdown"></div>
   </div>
 
 </div><!-- /page -->
 
-<!-- Bottom nav -->
-<nav class="nav-bar">
-  <button class="nav-item active" id="nav-home" onclick="switchTab('home')">
-    <div class="nav-ind"><span class="material-icons-round">backpack</span></div>
-    <span class="nav-lbl">My List</span>
-  </button>
-  <button class="nav-item" id="nav-trip" onclick="switchTab('trip')">
-    <div class="nav-ind"><span class="material-icons-round">checklist</span></div>
-    <span class="nav-lbl">CheckList</span>
-  </button>
-</nav>
+
+<!-- Gear Detail Modal -->
+<div class="scrim" id="detailScrim" onclick="closeDetail()">
+  <div class="dialog detail-dialog" onclick="event.stopPropagation()">
+    <div class="detail-img-wrap" id="detailImgWrap"></div>
+    <div class="detail-cat" id="detailCat"></div>
+    <div class="detail-name" id="detailName"></div>
+    <div class="detail-meta" id="detailMeta"></div>
+    <div class="detail-note" id="detailNote"></div>
+    <div class="dialog-actions" style="margin-top:20px">
+      <button class="btn-text detail-del-btn" id="detailDelBtn"><span class="material-icons-round" style="font-size:16px">delete</span>削除</button>
+      <button class="btn-filled" id="detailEditBtn"><span class="material-icons-round" style="font-size:16px">edit</span>編集</button>
+    </div>
+  </div>
+</div>
 
 <!-- Edit / Add Dialog -->
 <div class="scrim" id="editScrim">
   <div class="dialog">
     <div class="dialog-title" id="editDialogTitle">ギアを編集</div>
     <input type="hidden" id="editId">
+    <div class="tf dialog-url-tf" id="etf-url" style="display:none">
+      <input type="text" id="eUrl" placeholder=" "
+        oninput="tfInput(this)"
+        onpaste="onDialogUrlPaste(event)"
+        onkeydown="if(event.key==='Enter'){fetchDialogUrl(document.getElementById('eUrl').value)}">
+      <label>商品URL（貼り付けで自動入力）</label>
+      <span class="dialog-url-status" id="eUrlStatus"></span>
+    </div>
     <div class="tf" id="etf-name"><input type="text" id="eName" placeholder=" " oninput="tfInput(this)"><label>ギア名</label></div>
-    <div class="tf" id="etf-cat">
-      <select id="eCat" onchange="tfInput(this)">
-        <option value="">選択</option>
-        <option value="Sleep">😴 Sleep</option>
-        <option value="Cook">🍳 Cook</option>
-        <option value="Backpack">🎒 Backpack</option>
-        <option value="Clothing">👕 Clothing</option>
-        <option value="Footwear">👟 Footwear</option>
-        <option value="Navigation">🧭 Navigation</option>
-        <option value="Safety">🩹 Safety</option>
-        <option value="Food">🍱 Food & Water</option>
-        <option value="Light">🔦 Light</option>
-        <option value="Other">📦 Other</option>
-      </select>
-      <label>カテゴリ</label>
+    <input type="hidden" id="eCat">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div class="cat-chip-label" style="margin-bottom:0">カテゴリ</div>
+      <button type="button" onclick="openCatManager()"
+        style="display:inline-flex;align-items:center;gap:3px;padding:12px 10px;border-radius:999px;border:none;background:hsl(225,26%,90%);cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;color:var(--on-surface);line-height:1">
+        <span class="material-icons-round" style="font-size:14px">edit</span>編集
+      </button>
+    </div>
+    <div class="cat-chips" id="catChips">
+      <button type="button" class="cat-chip" data-cat="Sleep"       onclick="selectCat('Sleep')">Sleep</button>
+      <button type="button" class="cat-chip" data-cat="Cook"        onclick="selectCat('Cook')">Cook</button>
+      <button type="button" class="cat-chip" data-cat="Backpack"    onclick="selectCat('Backpack')">Backpack</button>
+      <button type="button" class="cat-chip" data-cat="Clothing"    onclick="selectCat('Clothing')">Wear</button>
+      <button type="button" class="cat-chip" data-cat="Safety"      onclick="selectCat('Safety')">Safety</button>
+      <button type="button" class="cat-chip" data-cat="Food"        onclick="selectCat('Food')">Food</button>
+      <button type="button" class="cat-chip" data-cat="Light"       onclick="selectCat('Light')">Light</button>
+      <button type="button" class="cat-chip" data-cat="Other"       onclick="selectCat('Other')">Other</button>
     </div>
     <div class="field-row">
       <div class="tf"><input type="number" id="eWeight" placeholder=" " min="0" oninput="tfInput(this)"><label>重量 (g)</label></div>
       <div class="tf"><input type="text" id="eNote" placeholder=" " oninput="tfInput(this)"><label>メモ</label></div>
     </div>
     <div class="dialog-actions">
-      <button class="btn-text" onclick="closeEdit()">キャンセル</button>
-      <button class="btn-filled" onclick="saveEdit()">保存</button>
+      <button class="btn-text" onclick="closeEdit()">閉じる</button>
+      <button class="btn-filled" id="editDialogAddBtn" onclick="confirmAddGear()" style="display:none">追加</button>
     </div>
   </div>
 </div>
 
+<!-- Add List Dialog -->
+<div class="scrim" id="addListScrim">
+  <div class="dialog">
+    <div class="dialog-title">シートを追加</div>
+    <div class="add-list-mode-row">
+      <button class="add-list-mode-btn active" id="modeNewBtn" onclick="setAddListMode('new')">
+        <span class="material-icons-round">add</span>新規作成
+      </button>
+      <button class="add-list-mode-btn" id="modeCopyBtn" onclick="setAddListMode('copy')">
+        <span class="material-icons-round">content_copy</span>コピー
+      </button>
+    </div>
+    <div id="addListNewSection">
+      <div class="tf">
+        <input type="text" id="newListName" placeholder=" " oninput="tfInput(this)">
+        <label>シート名</label>
+      </div>
+    </div>
+    <div id="addListCopySection" style="display:none">
+      <div class="add-list-copy-from">コピー元</div>
+      <div id="addListCopyOptions"></div>
+    </div>
+    <div class="dialog-actions">
+      <button class="btn-text" onclick="closeAddListModal()">閉じる</button>
+      <button class="btn-filled" onclick="confirmAddList()">追加</button>
+    </div>
+  </div>
+</div>
+
+<!-- Category Manager Dialog -->
+<div class="scrim" id="catManagerScrim" onclick="if(event.target===this)closeCatManager()">
+  <div class="dialog">
+    <div class="dialog-title">カテゴリを管理</div>
+    <div id="catManagerList" style="max-height:45vh;overflow-y:auto;margin-bottom:12px"></div>
+    <div class="cat-mgr-add-row">
+      <div class="tf" style="margin-bottom:0;flex:1">
+        <input type="text" id="catNewInput" placeholder=" " oninput="tfInput(this)"
+          onkeydown="if(event.key==='Enter')addNewCategory()">
+        <label>新しいカテゴリ名</label>
+      </div>
+      <button class="btn-tonal" onclick="addNewCategory()" style="flex-shrink:0">追加</button>
+    </div>
+    <div class="dialog-actions">
+      <button class="btn-filled" onclick="closeCatManager()">完了</button>
+    </div>
+  </div>
+</div>
+
+<!-- Account Panel -->
+<div class="side-scrim" id="accountScrim" onclick="closeAccount()"></div>
+<div class="side-panel" id="accountPanel">
+  <div class="side-panel-header">
+    <div class="side-panel-title">アカウント</div>
+    <button class="icon-btn" onclick="closeAccount()" style="width:36px;height:36px;background:transparent">
+      <span class="material-icons-round" style="font-size:20px">close</span>
+    </button>
+  </div>
+  <div class="account-avatar" id="accountAvatar" onclick="document.getElementById('accountImageInput').click()" title="画像を変更">
+    <span class="material-icons-round" id="accountAvatarIcon">account_circle</span>
+    <img id="accountAvatarImg" style="display:none;width:80px;height:80px;border-radius:50%;object-fit:cover">
+    <div class="account-avatar-edit"><span class="material-icons-round">edit</span></div>
+  </div>
+  <input type="file" id="accountImageInput" accept="image/*" style="display:none" onchange="onAccountImageChange(event)">
+  <div class="tf" style="margin-bottom:12px">
+    <input type="text" id="accName" placeholder=" " oninput="tfInput(this)" onblur="saveAccount()">
+    <label>名前</label>
+  </div>
+  <div class="tf" style="margin-bottom:12px">
+    <input type="text" id="accHandle" placeholder=" " oninput="tfInput(this)" onblur="saveAccount()">
+    <label>ハンドルネーム / SNS</label>
+  </div>
+  <div class="tf" style="margin-bottom:8px">
+    <input type="text" id="accBio" placeholder=" " oninput="tfInput(this)" onblur="saveAccount()">
+    <label>一言メモ</label>
+  </div>
+  <div class="autosave-hint">自動保存</div>
+</div>
+
+<button class="fab" onclick="openNewGearDialog({})">
+  <span class="material-icons-round">add</span>
+</button>
+
+<div class="list-tab-drop-line" id="listTabDropLine" aria-hidden="true"></div>
 <div class="snackbar" id="snackbar"></div>
 
 <script src="js/constants.js"></script>
