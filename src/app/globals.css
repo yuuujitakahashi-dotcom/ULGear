@@ -13,7 +13,7 @@
   --secondary-container: hsl(225,28%,87%);
   --on-secondary-container: #000000;
   --error: #c0392b;
-  --bg: hsl(225,28%,94%);
+  --bg: hsl(210,8%,90%);
   --surface: #ffffff;
   --surface-1: hsl(225,28%,97%);
   --surface-2: hsl(225,28%,92%);
@@ -61,13 +61,22 @@
 *,*::before,*::after { box-sizing: border-box; }
 
 body {
-  background: var(--bg);
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 10%, hsl(210,10%,94%) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 80% 80%, hsl(210,10%,87%) 0%, transparent 55%),
+    hsl(210,8%,90%);
+  background-attachment: fixed;
   color: var(--on-surface);
-  font-family: 'Noto Sans JP', system-ui, sans-serif;
   min-height: 100vh;
   font-size: 14px;
   overflow-x: hidden;
   width: 100%;
+}
+
+/* Google Sans for Latin & numbers, Hiragino Sans for Japanese */
+body {
+  font-family: var(--font-numeric), 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', var(--font-sans), system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
 }
 
 /* DnD classes (dynamically applied via JS) */
@@ -95,7 +104,7 @@ body {
 }
 
 .animate-slide-in { animation: slideIn .25s ease both; }
-.animate-fade-up  { animation: fadeUp .3s ease both; }
+.animate-fade-up  { animation: fadeUp .6s ease both; }
 .spin-icon        { animation: spin .8s linear infinite; }
 
 .dark {
@@ -134,6 +143,7 @@ body {
 
 @theme inline {
   --font-sans: var(--font-sans);
+  --font-numeric: var(--font-numeric);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);

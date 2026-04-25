@@ -19,7 +19,7 @@ export interface Category {
   key: string;
   label: string;
   group: 'base' | 'consumable';
-  col?: 0 | 1 | 2;
+  col?: 0 | 1 | 2 | 3;
 }
 
 export interface Account {
@@ -43,10 +43,11 @@ export const DEFAULT_CATEGORIES: Category[] = [
   { key: 'Safety',   label: 'Safety',   group: 'base' },
   { key: 'Light',    label: 'Light',    group: 'base' },
   { key: 'Rainwear', label: 'Rainwear', group: 'base' },
-  { key: 'Other',    label: 'Other',    group: 'base' },
+  { key: 'Other',    label: 'Other',    group: 'base',        col: 3 },
   { key: 'Food',     label: 'Food',     group: 'consumable', col: 0 },
   { key: 'Water',    label: 'Water',    group: 'consumable', col: 1 },
   { key: 'Fuel',     label: 'Fuel',     group: 'consumable', col: 2 },
+  { key: 'OtherC',   label: 'Other',    group: 'consumable', col: 3 },
 ];
 
 export const STORAGE_KEY = 'ulgear_data';
